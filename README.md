@@ -35,15 +35,16 @@ Since we want to use https everywhere, it also means that requests to https://mi
     cat minio-cert.pem minio-key.pem > .docker/certs/haproxy.pem
     cp $(mkcert -CAROOT)/rootCA.pem .docker/certs/
     ```
-3. Add the following to your hosts file :
+3. copy the env file : `cp .env.example .env` 
+4. Add the following to your hosts file :
     ```
     127.0.0.1      minio-console.test
     127.0.0.1      minio-api.test
     127.0.0.1      laravel.test
    ```
-4. Run `docker-compose up -d`
-5. Run `docker-compose exec "php composer install && php /var/www/html/artisan key:generate && php /var/www/html/artisan migrate"`
-6. Create a bucket called `mybucket`. You can do it either : 
+5. Run `docker-compose up -d`
+6. Run `docker-compose exec "php composer install && php /var/www/html/artisan key:generate && php /var/www/html/artisan migrate"`
+7. Create a bucket called `mybucket`. You can do it either : 
    * Through the API : Run `docker-compose exec minio mc mb myminio/mybucket` in your terminal.
    * Through the web UI : Go to `https://minio-console.test` in your browser, login with the credentials (`admin`/`password`), and create the bucket.
-7. Open `https://laravel.test` in your browser, you should be able to upload a png file to the bucket through a temporary upload URL, and then see it displayed through a temporary URL.
+8. Open `https://laravel.test` in your browser, you should be able to upload a png file to the bucket through a temporary upload URL, and then see it displayed through a temporary URL.
