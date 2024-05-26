@@ -42,9 +42,10 @@ Since we want to use https everywhere, it also means that requests to https://mi
     127.0.0.1      minio-api.test
     127.0.0.1      laravel.test
    ```
-5. Run `docker-compose up -d`
-6. Run `docker-compose exec "php composer install && php /var/www/html/artisan key:generate && php /var/www/html/artisan migrate"`
-7. Create a bucket called `mybucket`. You can do it either : 
+5. Run `docker run --rm --interactive --tty --volume $PWD:/app composer install` to install the composer dependencies
+6. Run `docker-compose up -d` to start the servives as daemons
+7. Run `docker-compose exec php bash -c "touch /var/www/html/database/database.sqlite && php /var/www/html/artisan key:generate && php /var/www/html/artisan migrate"` to create a database, app key, and run the migrations
+8. Create a bucket called `mybucket`. You can do it either : 
    * Through the API : Run `docker-compose exec minio mc mb myminio/mybucket` in your terminal.
    * Through the web UI : Go to `https://minio-console.test` in your browser, login with the credentials (`admin`/`password`), and create the bucket.
-8. Open `https://laravel.test` in your browser, you should be able to upload a png file to the bucket through a temporary upload URL, and then see it displayed through a temporary URL.
+9. Open `https://laravel.test` in your browser, you should be able to upload a png file to the bucket through a temporary upload URL, and then see it displayed through a temporary URL.
