@@ -1,0 +1,40 @@
+services:
+  haproxy:
+    image: haproxy:2.9
+    sysctls:
+      - net.ipv4.ip_unprivileged_port_start=0
+    ports:
+      - "443:443"
+    volumes:
+      - ./.docker/haproxy:/usr/local/etc/haproxy:ro
+      - ./.docker/certs:/usr/local/etc/certs:ro
+    networks:
+      default :
+        # Make sure that requests to minio-api.test from within the network
+        # are routed to HAproxy and not directly to the minio container or 127.0.0.1
+        aliases:
+          - minio-api.test
+  minio:
+    image: 'minio/minio:latest'
+    environment:
+      MINIO_ROOT_USER: '${AWS_ACCESS_KEY_ID}'
+      MINIO_ROOT_PASSWORD: '${AWS_SECRET_ACCESS_KEY}'
+      MINIO_SERVER_URL : '${AWS_ENDPOINT}'
+      MINIO_BROWSER_REDIRECT_URL : '${MINIO_CONSOLE_URL}'
+      # Set a default "myminio" alias to be used with the mc command line tool :
+      MC_HOST_myminio: '${AWS_SCHEME}://${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}@${AWS_DOMAIN}'
+    command: minio server /data --console-address ":9001"
+    volumes:
+      - 'minio:/data'
+      # Mount the root CA certificate from mkcert for both MinIO and MC
+      - ./.docker/certs/rootCA.pem:/root/.minio/certs/CAs/rootCA.crt:ro
+      - ./.docker/certs/rootCA.pem:/tmp/.mc/certs/CAs/rootCA.crt:ro
+  php:
+    image: 'php:8.3-cli'
+    command: bash -c "update-ca-certificates && php /var/www/html/artisan serve --host=0.0.0.0 --port=80"
+    volumes:
+      - .:/var/www/html
+      # Mount the root CA certificate from mkcert so that Laravel can make https requests to MinIO through HAproxy :
+      - ./.docker/certs/rootCA.pem:/usr/local/share/ca-certificates/cacert.crt:ro
+volumes:
+  minio:
