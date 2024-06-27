@@ -1,6 +1,6 @@
 services:
   haproxy:
-    image: haproxy:2.9
+    image: haproxy:3.0
     sysctls:
       - net.ipv4.ip_unprivileged_port_start=0
     ports:
